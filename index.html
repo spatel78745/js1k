@@ -1,0 +1,93 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Experiments</title>
+  </head>
+  <body>
+  <canvas id="pie" width="400" height="200" style="border:1px solid">
+    <!-- <script src="file:///Users/spatel78745/js1k/bb.js"></script> -->
+  </canvas>
+
+  <script>
+
+  function Wedge(canvasId, x, y, radius, sAngle, eAngle, color) {
+    this.ctx = document.getElementById(canvasId).getContext("2d");
+    this.x = x;
+    this.y = y;
+    this.radius = radius;
+    this.sAngle = sAngle;
+    this.eAngle = eAngle;
+
+
+    this.draw = function() {
+      var self = this;
+
+      self.ctx.fillStyle = color;
+      self.ctx.beginPath();
+      self.ctx.moveTo(x, y);
+      self.ctx.arc(this.x, this.y, this.radius, this.sAngle, this.eAngle);
+      self.ctx.closePath();
+      self.ctx.fill();
+    }
+  }
+
+  function PieChart(canvasId, x, y, radius) {
+    this.canvasId = canvasId;
+    this.wedges = [];
+    this.x = x;
+    this.y = y;
+    this.radius = radius;
+
+    this.idx = 0;
+    this.colors = new Array("DarkGreen", "DarkKhaki", "DarkMagenta", "DarkOrange", "DarkRed",
+        "DarkSalmon");
+
+    this.addWedge = function(fraction, color) {
+      var self = this;
+      var wedges = self.wedges;
+      var idx = self.idx;
+
+      var sAngle;
+      var eAngle;
+
+      if (idx == 0) {
+        sAngle = 0;
+      } else {
+        var lastWedge = wedges[idx - 1];
+        sAngle = lastWedge.eAngle;
+      }
+
+      eAngle = sAngle + fraction*2*Math.PI;
+
+      wedges[idx] = new Wedge(self.canvasId, self.x, self.y, self.radius, self.color[idx]);
+
+      self.idx++;
+    }
+
+    this.draw = function() {
+      var self = this;
+      var wedges = self.wedges;
+      var i;
+
+      for(i = 0; i < wedges.length; i++) {
+        console.log("fraction: " + wedges[i].fraction + " color: " + wedges[i].color);
+
+      }
+    }
+  }
+
+  var greenWedge = new Wedge("pie", 100, 100, 100, 0, 0.25 * Math.PI, "green");
+  var redWedge = new Wedge("pie", 100, 100, 100, 0.25 * Math.PI, 0.80 * Math.PI, "red");
+  greenWedge.draw();
+  redWedge.draw();
+
+  var pieChart = new PieChart();
+  pieChart.addWedge("0.25", "red");
+  pieChart.addWedge("0.5", "green");
+  pieChart.addWedge("0.25", "blue");
+  pieChart.draw();
+
+  </script>
+  </body>
+</html>
