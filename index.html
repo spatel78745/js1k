@@ -23,6 +23,11 @@
     this.draw = function() {
       var self = this;
 
+      function rad_to_deg(rad) { return 180 / Math.PI * rad; }
+
+      console.log("draw: x= " + x + " y= " + y + " sAngle= " + rad_to_deg(sAngle) + " eAngle= " 
+          + rad_to_deg(eAngle) + " diff: " + rad_to_deg(eAngle - sAngle) + " color= " + color);
+
       self.ctx.fillStyle = color;
       self.ctx.beginPath();
       self.ctx.moveTo(x, y);
@@ -43,7 +48,7 @@
     this.colors = new Array("DarkGreen", "DarkKhaki", "DarkMagenta", "DarkOrange", "DarkRed",
         "DarkSalmon");
 
-    this.addWedge = function(fraction, color) {
+    this.addWedge = function(fraction) {
       var self = this;
       var wedges = self.wedges;
       var idx = self.idx;
@@ -60,7 +65,7 @@
 
       eAngle = sAngle + fraction*2*Math.PI;
 
-      wedges[idx] = new Wedge(self.canvasId, self.x, self.y, self.radius, self.color[idx]);
+      wedges[idx] = new Wedge(self.canvasId, self.x, self.y, self.radius, sAngle, eAngle, self.colors[idx]);
 
       self.idx++;
     }
@@ -71,21 +76,20 @@
       var i;
 
       for(i = 0; i < wedges.length; i++) {
-        console.log("fraction: " + wedges[i].fraction + " color: " + wedges[i].color);
-
+        wedges[i].draw();
       }
     }
   }
 
-  var greenWedge = new Wedge("pie", 100, 100, 100, 0, 0.25 * Math.PI, "green");
-  var redWedge = new Wedge("pie", 100, 100, 100, 0.25 * Math.PI, 0.80 * Math.PI, "red");
-  greenWedge.draw();
-  redWedge.draw();
+//  var greenWedge = new Wedge("pie", 100, 100, 100, 0, 0.25 * Math.PI, "green");
+//  var redWedge = new Wedge("pie", 100, 100, 100, 0.25 * Math.PI, 0.80 * Math.PI, "red");
+//  greenWedge.draw();
+//  redWedge.draw();
 
-  var pieChart = new PieChart();
-  pieChart.addWedge("0.25", "red");
-  pieChart.addWedge("0.5", "green");
-  pieChart.addWedge("0.25", "blue");
+  var pieChart = new PieChart("pie", 100, 100, 100);
+  pieChart.addWedge("0.30");
+  pieChart.addWedge("0.10");
+  pieChart.addWedge("0.60");
   pieChart.draw();
 
   </script>
