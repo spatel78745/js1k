@@ -15,6 +15,7 @@
     this.ctx = document.getElementById(canvasId).getContext("2d");
     this.x = x;
     this.y = y;
+    this.color = color;
     this.radius = radius;
     this.sAngle = sAngle;
     this.eAngle = eAngle;
@@ -27,7 +28,7 @@
       console.log("draw: x= " + x + " y= " + y + " sAngle= " + rad_to_deg(sAngle) + " eAngle= " 
           + rad_to_deg(eAngle) + " diff: " + rad_to_deg(eAngle - sAngle) + " color= " + color);
 
-      this.ctx.fillStyle = color;
+      this.ctx.fillStyle = this.color;
       this.ctx.beginPath();
       this.ctx.moveTo(x, y);
       this.ctx.arc(this.x, this.y, this.radius, this.sAngle, this.eAngle);
@@ -36,18 +37,39 @@
     }
   }
 
-  function PieChart(canvasId, x, y, radius) {
+  function PieChart(canvasId, title) {
     this.canvasId = canvasId;
+    this.canvas = document.getElementById(canvasId);
+    this.ctx = this.canvas.getContext("2d");
     this.wedges = [];
-    this.x = x;
-    this.y = y;
-    this.radius = radius;
+    this.legend = [];
+    this.title = title;
+    this.x = this.y = this.radius = this.canvas.width / 4;
 
     this.idx = 0;
     this.colors = new Array("DarkGreen", "DarkKhaki", "DarkMagenta", "DarkOrange", "DarkRed",
         "DarkSalmon");
 
-    this.addWedge = function(fraction) {
+    this.drawTitle = function() {
+      this.ctx.font ="12px Courier";
+      this.ctx.textAlign = "center";
+      this.ctx.fillText(this.title, this.canvas.width / 2, 12);
+    }
+
+    this.drawLegend = function() {
+      var x = this.canvas.width * (2/3), y = 24, i;
+
+      this.ctx.font ="12px Courier";
+      this.ctx.textAlign = "start";
+
+      for(i = 0; i < this.legend.length; i++) {
+        this.ctx.fillStyle = this.colors[i];
+        this.ctx.fillText(this.legend[i], x, y);
+        y += 12;
+      }
+    }
+
+    this.addWedge = function(fraction, title) {
       var wedges = this.wedges;
       var idx = this.idx;
 
@@ -64,6 +86,7 @@
       eAngle = sAngle + fraction*2*Math.PI;
 
       wedges[idx] = new Wedge(this.canvasId, this.x, this.y, this.radius, sAngle, eAngle, this.colors[idx]);
+      this.legend[idx] = title;
 
       this.idx++;
     }
@@ -72,16 +95,20 @@
       var wedges = this.wedges;
       var i;
 
+      this.drawTitle();
+      this.drawLegend();
+
       for(i = 0; i < wedges.length; i++) {
         wedges[i].draw();
       }
     }
   }
 
-  var pieChart = new PieChart("pie", 100, 100, 100);
-  pieChart.addWedge("0.30");
-  pieChart.addWedge("0.10");
-  pieChart.addWedge("0.60");
+  var pieChart = new PieChart("pie", "Genres");
+  pieChart.addWedge("0.05", "SciFi");
+  pieChart.addWedge("0.20", "Horror");
+  pieChart.addWedge("0.70", "Drama");
+  pieChart.addWedge("0.05", "Comedy");
   pieChart.draw();
 
   </script>
