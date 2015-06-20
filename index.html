@@ -37,6 +37,77 @@
     }
   }
 
+  function drawPieChart(canvasId, title, stats) {
+    var canvas = document.getElementById(canvasId);
+    var ctx = canvas.getContext("2d");
+    var i;
+
+    var x = y = radius = canvas.width / 4;
+
+    colors = new Array("DarkGreen", "DarkKhaki", "DarkMagenta", "DarkOrange",
+        "DarkRed", "DarkSalmon");
+
+    function drawTitle() {
+      ctx.font ="12px Courier";
+      ctx.textAlign = "center";
+      ctx.fillText(title, canvas.width / 2, 12);
+    }
+
+    drawLegend = function() {
+      var x = canvas.width * (2/3), y = 24, i;
+
+      ctx.font ="12px Courier";
+      ctx.textAlign = "start";
+
+      i = 0;
+      for (var key in stats) {
+        if (stats.hasOwnProperty(key) && key != "total") {
+          var fraction = stats[key] / stats["total"];
+          ctx.fillStyle = colors[i];
+          ctx.fillText(key + " " + Math.ceil(fraction * 100) + "%", x, y);
+          y += 12;
+          i++;
+        }
+      }
+    }
+
+    function drawWedge(sAngle, eAngle, color) {
+      function rad_to_deg(rad) { return 180 / Math.PI * rad; }
+
+      console.log("draw: x= " + x + " y= " + y + " sAngle= " + rad_to_deg(sAngle) + " eAngle= "
+          + rad_to_deg(eAngle) + " diff: " + rad_to_deg(eAngle - sAngle) + " color= " + color);
+
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.arc(x, y, radius, sAngle, eAngle);
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    function drawPie() {
+      var sAngle = 0;
+
+      var idx = 0;
+      for (var key in stats) {
+        if (stats.hasOwnProperty(key) && key != "total") {
+          var fraction = stats[key] / stats["total"];
+          console.log("stats[" + key + "] = " + stats[key] + " fraction: " + fraction);
+          var eAngle = sAngle + fraction * 2 * Math.PI;
+
+          drawWedge(sAngle, eAngle, colors[idx]);
+
+          sAngle = eAngle;
+          idx++;
+        }
+      }
+    }
+
+    drawTitle();
+    drawLegend();
+    drawPie();
+  }
+
   function PieChart(canvasId, title) {
     this.canvasId = canvasId;
     this.canvas = document.getElementById(canvasId);
@@ -104,12 +175,21 @@
     }
   }
 
-  var pieChart = new PieChart("pie", "Genres");
-  pieChart.addWedge("0.05", "SciFi");
-  pieChart.addWedge("0.20", "Horror");
-  pieChart.addWedge("0.70", "Drama");
-  pieChart.addWedge("0.05", "Comedy");
-  pieChart.draw();
+//  var pieChart = new PieChart("pie", "Genres");
+//  pieChart.addWedge("0.05", "SciFi");
+//  pieChart.addWedge("0.20", "Horror");
+//  pieChart.addWedge("0.70", "Drama");
+//  pieChart.addWedge("0.05", "Comedy");
+//  pieChart.draw();
+var currentStats = {
+  "Drama"  : 2,
+  "SciFi"  : 2,
+  "Comedy" : 1,
+  "Action" : 2,
+  "total"  : 7
+};
+
+drawPieChart("pie", "Genres", currentStats);
 
   </script>
   </body>
