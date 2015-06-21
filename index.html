@@ -37,12 +37,10 @@
     }
   }
 
-  function drawPieChart(canvasId, title, stats) {
-    var canvas = document.getElementById(canvasId);
-    var ctx = canvas.getContext("2d");
+  function drawPieChart(ctx, width, title, stats) {
     var i;
 
-    var x = y = radius = canvas.width / 4;
+    var x = y = radius = width / 4;
 
     colors = new Array("DarkGreen", "DarkKhaki", "DarkMagenta", "DarkOrange",
         "DarkRed", "DarkSalmon");
@@ -50,11 +48,11 @@
     function drawTitle() {
       ctx.font ="12px Courier";
       ctx.textAlign = "center";
-      ctx.fillText(title, canvas.width / 2, 12);
+      ctx.fillText(title, width / 2, 12);
     }
 
     drawLegend = function() {
-      var x = canvas.width * (2/3), y = 24, i;
+      var x = width * (2/3), y = 24, i;
 
       ctx.font ="12px Courier";
       ctx.textAlign = "start";
@@ -189,7 +187,10 @@ var currentStats = {
   "total"  : 7
 };
 
-drawPieChart("pie", "Genres", currentStats);
+
+var canvas = document.getElementById("pie");
+var context = canvas.getContext("2d");
+drawPieChart(context, canvas.width, "Genres", currentStats);
 
   </script>
   </body>

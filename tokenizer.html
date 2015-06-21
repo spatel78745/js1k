@@ -1,0 +1,62 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Tokenizer</title>
+  </head>
+  <body>
+  <script>
+
+  var Tokenizer = function(str) {
+    // Private
+    var lexemes = str.split(/[" "]/);
+    var index = 0;
+
+    // Public
+    var peek = function() {
+      if (index >= lexemes.length) return { type: "EOF", val: "" };
+
+      var lexeme = lexemes[index];
+      var c = lexeme.charAt(0);
+
+      if      (c == '&') token = { type: "AND"   , val: "&"    } ;
+      else if (c == '|') token = { type: "OR"    , val: "|"    } ;
+      else if (c == '(') token = { type: "OPEN"  , val: "("    } ;
+      else if (c == ')') token = { type: "CLOSE" , val: ")"    } ;
+      else               token = { type: "STR"   , val: lexeme } ;
+
+      return token;
+    }
+
+    var get = function() {
+      token = peek();
+      if (token.type != "EOF") index++;
+
+      return token;
+    }
+
+    getStr = function() { return str; }
+
+    return {
+      peek   : peek,
+      get    : get,
+      getStr : getStr
+    }
+  }
+
+  function dump(tokenizer) {
+    for(token = tokenizer.get(); token.type != "EOF"; token = tokenizer.get()) {
+      console.log("type: ", token.type, " value: ", token.val);
+    }
+  }
+
+  var shakespeare = new Tokenizer("to be or & not to | be");
+  var auden       = new Tokenizer("perfection of & a kind was | what he was after");
+
+  dump(shakespeare);
+  console.log("================");
+  dump(auden);
+
+  </script>
+  </body>
+</html>
