@@ -50,12 +50,46 @@
     }
   }
 
-  var shakespeare = new Tokenizer("to be or & not to | be");
-  var auden       = new Tokenizer("perfection of & a kind was | what he was after");
+  str = "(this is a token &another token)"
+  index = 0;
 
-  dump(shakespeare);
-  console.log("================");
-  dump(auden);
+  var Token = function(lexeme) {
+    var op;
+
+    token = {
+      val     : lexeme,
+      toString: function() { return "type: " + this.type + " val: " + this.val; }
+    };
+
+    if      (lexeme == '&') { token.type = "AND"   }
+    else if (lexeme == ' ') { token.type = "AND"   }
+    else if (lexeme == '|') { token.type = "OR"    }
+    else if (lexeme == '(') { token.type = "OPEN"  }
+    else if (lexeme == ')') { token.type = "CLOSE" }
+    else                    { token.type = "STR"   }
+
+    return token;
+  }
+
+function testToken(lexeme)
+{
+  token = new Token(lexeme);
+  console.log("token: " + token);
+}
+
+testToken("&");
+testToken("|");
+testToken(")");
+testToken("coriolanus");
+
+
+//  var shakespeare = new Tokenizer("to be or & not to | be");
+//  var auden       = new Tokenizer("perfection of & a kind was | what he was after");
+//
+//  dump(shakespeare);
+//  console.log("================");
+//  dump(auden);
+
 
   </script>
   </body>

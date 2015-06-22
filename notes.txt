@@ -1,0 +1,15 @@
+get()
+{
+  var lexeme = "";
+  var c = str.charAt(index);
+
+  if (c is an operator) {
+    return operator token
+  } else {
+    while(index < str.length)
+    {
+      if ((c = str.charAt(index)) doesn't match an operator)
+        lexeme += c;
+    }
+  }
+}
