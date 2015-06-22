@@ -77,28 +77,19 @@
   }
 
   function get() {
-    var lexeme = "";
-    var isOp   = function(c) { return c.match(/[ &|()]/); }
-    var isText = function(c) { return !isOp(c); }
-    var c, nextc;
-    var token, type, val;
+    var c, token, val;
 
-    if (!(c = getc())) return new Token("EOF", "EOF");
+    function isOp(c)   { return c.match(/[ &|()]/); }
+    function isText(c) { return !isOp(c);           }
 
-    val = c;
-
-    if (isText(c)) {
+    if (!(val = c = getc())) {
+      token = new Token("EOF", "EOF");
+    } else if (isText(c)) {
       while((c = getc()) && isText(c)) {
         val += c;
       }
-      if (c) ungetc();
-
-//      console.log("Next char: " + c);
-
-      return new Token("STR", val);
-    }
-
-    if (c == " ") {
+      token = new Token("STR", val);
+    } else if (c == " ") {
       c = getc();
       if (!c) {
         token = new Token("EOF", "EOF");
@@ -108,48 +99,20 @@
       } else {
         token = new Token("&", "&");
       }
-
-      if (c) ungetc();
-      return new Token("&", "&");
-    }
-
-    if (isOp(c)) {
-        token = new Token(c, c); 
+    } else if (isOp(c)) {
+        token = new Token(c, c);
         while((c = getc()) && isOp(c));
-        if (c) ungetc();
-
-        return token;
+    } else {
+      console.log("BUG: Unknown case");
+      token = new Token("EOF", "EOF");
     }
 
-//    switch(c) {
-//      case ' ':
-//        nextc = getc();
-//
-//        if (!nextc) {
-//          token = new Token("EOF", "EOF");
-//        } else if (isOp(nextc)) {
-//          token = new Token(nextc, nextc);
-//
-//          while((nextc = getc()) && isOp(nextc));
-//          if (nextc) ungetc();
-//        } else {
-//        }
-//    }
-//
-//    if (isOp(c)) {
-//      return new Token(c);
-//    }
-//    else {
-//      lexeme += c;
-//      while((c = getc())) {
-//        if (!isOp(c) lexeme += c;
-//      }
-//
-//      return new Token(lexeme);
-//    }
+    if (c) ungetc();
+
+    return token;
   }
 
-  str = "this & is a token &another token"
+  str = "(this&that|another)"
   index = 0;
 
   for(token = get(); token.type != "EOF"; token = get()) {
