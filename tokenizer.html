@@ -71,17 +71,39 @@
     return token;
   }
 
-function testToken(lexeme)
-{
-  token = new Token(lexeme);
-  console.log("token: " + token);
-}
+  function getchar() {
+    if (index < str.length) {
+      var c = str.charAt(index);
 
-testToken("&");
-testToken("|");
-testToken(")");
-testToken("coriolanus");
+      index++;
 
+      return c;
+    }
+
+    return ""
+  }
+
+  function testToken(lexeme) {
+    token = new Token(lexeme);
+    console.log("token: " + token);
+  }
+
+//  testToken("&");
+//  testToken("|");
+//  testToken(")");
+//  testToken("coriolanus");
+
+  function testGetchar(str) {
+    var c;
+
+    console.log(str);
+
+    while((c = getchar())) {
+      console.log("index: " + index + " char: [" + c + "]");
+    }
+  }
+
+  testGetchar("this is a long string & |");
 
 //  var shakespeare = new Tokenizer("to be or & not to | be");
 //  var auden       = new Tokenizer("perfection of & a kind was | what he was after");
