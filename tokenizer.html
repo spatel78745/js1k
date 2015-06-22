@@ -50,28 +50,18 @@
     }
   }
 
-  str = "(this is a token &another token)"
-  index = 0;
-
-  var Token = function(lexeme) {
-    var op;
-
-    token = {
-      val     : lexeme,
+  var Token = function(type, val) {
+    console.log("Token -> type: " + type + " val: " + val);
+    return {
+      type    : type,
+      val     : val,
       toString: function() { return "type: " + this.type + " val: " + this.val; }
     };
-
-    if      (lexeme == '&') { token.type = "AND"   }
-    else if (lexeme == ' ') { token.type = "AND"   }
-    else if (lexeme == '|') { token.type = "OR"    }
-    else if (lexeme == '(') { token.type = "OPEN"  }
-    else if (lexeme == ')') { token.type = "CLOSE" }
-    else                    { token.type = "STR"   }
 
     return token;
   }
 
-  function getchar() {
+  function getc() {
     if (index < str.length) {
       var c = str.charAt(index);
 
@@ -80,30 +70,91 @@
       return c;
     }
 
-    return ""
+    return false;
   }
 
-  function testToken(lexeme) {
-    token = new Token(lexeme);
-    console.log("token: " + token);
+  function ungetc() {
+    index--;
   }
+
+  function get() {
+    var lexeme = "";
+    var isOp   = function(c) { return c.match(/[ &|)]/); }
+    var isText = function(c) { return !isOp(c); }
+    var c, nextc;
+    var token, type, val;
+
+    c = getc();
+    if (!c) return new Token("EOF", "EOF");
+
+    val = c;
+    console.log("val: " + c);
+    if (isText(c)) {
+      while((c = getc()) && isText(c)) {
+        val += c;
+        console.log("val: " + val);
+      }
+      if (c) ungetc();
+
+      console.log("creating Token: " + val);
+      return new Token("STR", val);
+    }
+
+//    switch(c) {
+//      case ' ':
+//        nextc = getc();
+//
+//        if (!nextc) {
+//          token = new Token("EOF", "EOF");
+//        } else if (isOp(nextc)) {
+//          token = new Token(nextc, nextc);
+//
+//          while((nextc = getc()) && isOp(nextc));
+//          if (nextc) ungetc();
+//        } else {
+//        }
+//    }
+//
+//    if (isOp(c)) {
+//      return new Token(c);
+//    }
+//    else {
+//      lexeme += c;
+//      while((c = getc())) {
+//        if (!isOp(c) lexeme += c;
+//      }
+//
+//      return new Token(lexeme);
+//    }
+  }
+
+  str = "(this is a token &another token)"
+  index = 0;
+
+  var token = get();
+  console.log("get: " + token);
+
+//  function testToken(lexeme) {
+//    token = new Token(lexeme);
+//    console.log("token: " + token);
+//  }
 
 //  testToken("&");
 //  testToken("|");
 //  testToken(")");
 //  testToken("coriolanus");
 
-  function testGetchar(str) {
-    var c;
+//  function testGetchar(str) {
+//    var c;
+//
+//    console.log(str);
+//
+//    while((c = getchar())) {
+//      console.log("index: " + index + " char: [" + c + "]");
+//    }
+//  }
 
-    console.log(str);
-
-    while((c = getchar())) {
-      console.log("index: " + index + " char: [" + c + "]");
-    }
-  }
-
-  testGetchar("this is a long string & |");
+//  testGetchar("this is a long string & |");
 
 //  var shakespeare = new Tokenizer("to be or & not to | be");
 //  var auden       = new Tokenizer("perfection of & a kind was | what he was after");
