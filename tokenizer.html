@@ -51,7 +51,6 @@
   }
 
   var Token = function(type, val) {
-    console.log("Token -> type: " + type + " val: " + val);
     return {
       type    : type,
       val     : val,
@@ -79,25 +78,47 @@
 
   function get() {
     var lexeme = "";
-    var isOp   = function(c) { return c.match(/[ &|)]/); }
+    var isOp   = function(c) { return c.match(/[ &|()]/); }
     var isText = function(c) { return !isOp(c); }
     var c, nextc;
     var token, type, val;
 
-    c = getc();
-    if (!c) return new Token("EOF", "EOF");
+    if (!(c = getc())) return new Token("EOF", "EOF");
 
     val = c;
-    console.log("val: " + c);
+
     if (isText(c)) {
       while((c = getc()) && isText(c)) {
         val += c;
-        console.log("val: " + val);
       }
       if (c) ungetc();
 
-      console.log("creating Token: " + val);
+//      console.log("Next char: " + c);
+
       return new Token("STR", val);
+    }
+
+    if (c == " ") {
+      c = getc();
+      if (!c) {
+        token = new Token("EOF", "EOF");
+      } else if (isOp(c)) {
+        token = new Token(c, c);
+        while((c = getc()) && isOp(c));
+      } else {
+        token = new Token("&", "&");
+      }
+
+      if (c) ungetc();
+      return new Token("&", "&");
+    }
+
+    if (isOp(c)) {
+        token = new Token(c, c); 
+        while((c = getc()) && isOp(c));
+        if (c) ungetc();
+
+        return token;
     }
 
 //    switch(c) {
@@ -128,11 +149,24 @@
 //    }
   }
 
-  str = "(this is a token &another token)"
+  str = "this & is a token &another token"
   index = 0;
 
-  var token = get();
-  console.log("get: " + token);
+  for(token = get(); token.type != "EOF"; token = get()) {
+    console.log("get: " + token);
+  }
+
+//  token = get();
+//  console.log("get: " + token);
+//
+//  token = get();
+//  console.log("get: " + token);
+//
+//  token = get();
+//  console.log("get: " + token);
+//
+//  token = get();
+//  console.log("get: " + token);
 
 //  function testToken(lexeme) {
 //    token = new Token(lexeme);
