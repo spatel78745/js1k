@@ -7,49 +7,6 @@
   <body>
   <script>
 
-  var Tokenizer = function(str) {
-    // Private
-    var lexemes = str.split(/[" "]/);
-    var index = 0;
-
-    // Public
-    var peek = function() {
-      if (index >= lexemes.length) return { type: "EOF", val: "" };
-
-      var lexeme = lexemes[index];
-      var c = lexeme.charAt(0);
-
-      if      (c == '&') token = { type: "AND"   , val: "&"    } ;
-      else if (c == '|') token = { type: "OR"    , val: "|"    } ;
-      else if (c == '(') token = { type: "OPEN"  , val: "("    } ;
-      else if (c == ')') token = { type: "CLOSE" , val: ")"    } ;
-      else               token = { type: "STR"   , val: lexeme } ;
-
-      return token;
-    }
-
-    var get = function() {
-      token = peek();
-      if (token.type != "EOF") index++;
-
-      return token;
-    }
-
-    getStr = function() { return str; }
-
-    return {
-      peek   : peek,
-      get    : get,
-      getStr : getStr
-    }
-  }
-
-  function dump(tokenizer) {
-    for(token = tokenizer.get(); token.type != "EOF"; token = tokenizer.get()) {
-      console.log("type: ", token.type, " value: ", token.val);
-    }
-  }
-
   var Token = function(type, val) {
     return {
       type    : type,
@@ -60,106 +17,129 @@
     return token;
   }
 
-  function getc() {
-    if (index < str.length) {
-      var c = str.charAt(index);
+  var Tokenizer = function(str) {
+    // Private
+    var index = 0;
+    var lookahead;
 
-      index++;
-
-      return c;
+    var getc = function() {
+      if (index < str.length) {
+        var c = str.charAt(index);
+        index++;
+        return c;
+      }
+      return false;
     }
 
-    return false;
-  }
+    var ungetc = function ungetc() { index--; }
 
-  function ungetc() {
-    index--;
-  }
+    // Public
+    var get = function() {
+      var c, token, val;
 
-  function get() {
-    var c, token, val;
+      function isOp(c)   { return c.match(/[ &|()]/); }
+      function isText(c) { return !isOp(c);           }
 
-    function isOp(c)   { return c.match(/[ &|()]/); }
-    function isText(c) { return !isOp(c);           }
+      if (lookahead) {
+        token     = lookahead;
+        lookahead = false;
 
-    if (!(val = c = getc())) {
-      token = new Token("EOF", "EOF");
-    } else if (isText(c)) {
-      while((c = getc()) && isText(c)) {
-        val += c;
+        return token;
       }
-      token = new Token("STR", val);
-    } else if (c == " ") {
-      c = getc();
-      if (!c) {
+
+      if (!(val = c = getc())) {
         token = new Token("EOF", "EOF");
+      } else if (isText(c)) {
+        while((c = getc()) && isText(c)) {
+          val += c;
+        }
+        token = new Token("STR", val);
+      } else if (c == " ") {
+        c = getc();
+        if (!c) {
+          token = new Token("EOF", "EOF");
+        } else if (isOp(c)) {
+          token = new Token(c, c);
+          while((c = getc()) && isOp(c));
+        } else {
+          token = new Token("&", "&");
+        }
       } else if (isOp(c)) {
-        token = new Token(c, c);
-        while((c = getc()) && isOp(c));
+          token = new Token(c, c);
+          while((c = getc()) && isOp(c));
       } else {
-        token = new Token("&", "&");
+        console.log("BUG: Unknown case");
+        token = new Token("EOF", "EOF");
       }
-    } else if (isOp(c)) {
-        token = new Token(c, c);
-        while((c = getc()) && isOp(c));
-    } else {
-      console.log("BUG: Unknown case");
-      token = new Token("EOF", "EOF");
+
+      if (c) ungetc();
+
+      return token;
     }
 
-    if (c) ungetc();
+    var peek = function() {
+      lookahead = get();
 
-    return token;
+      return lookahead;
+    }
+
+    return {
+      get : get,
+      peek: peek
+    }
   }
 
-  str = "(this&that|another)"
-  index = 0;
+  console.log("V3");
 
-  for(token = get(); token.type != "EOF"; token = get()) {
-    console.log("get: " + token);
+  var Exp = function(type, op1, op2) {
+    console.log("op1: " + op1);
+    console.log("op2: " + op2);
+    if (type == "&"    ) { return function(context) { return op1(context) && op2(context); } }
+    if (type == "|"    ) { return function(context) { return op1(context) || op2(context); } }
+    if (type == "TRUE" ) { return function(context) { return true                        ; } }
+    if (type == "FALSE") { return function(context) { return false                       ; } }
+    if (type == "STR"  ) { return function(context) { return context.search(op1) != -1   ; } }
   }
 
-//  token = get();
-//  console.log("get: " + token);
-//
-//  token = get();
-//  console.log("get: " + token);
-//
-//  token = get();
-//  console.log("get: " + token);
-//
-//  token = get();
-//  console.log("get: " + token);
+  function makeMatcher(tokenizer) {
+    var token = tokenizer.get();
+    var subExp;
 
-//  function testToken(lexeme) {
-//    token = new Token(lexeme);
-//    console.log("token: " + token);
-//  }
+    if (token.type == "(") {
+      console.log("Start parenthesized expression");
+      subExp = makeMatcher(tokenizer);
+    } else if (token.type == "STR") {
+      console.log("New STR: " + token.val);
+      subExp = new Exp("STR", token.val);
+    } else {
+      console.log("Error: expected string or parenthesis, got [ " + token.val + " ]");
+      return new Exp("TRUE");
+    }
 
-//  testToken("&");
-//  testToken("|");
-//  testToken(")");
-//  testToken("coriolanus");
+    var lookahead = tokenizer.peek();
+    console.log("lookahead: " + lookahead.type + " " + lookahead.val);
 
-//  function testGetchar(str) {
-//    var c;
-//
-//    console.log(str);
-//
-//    while((c = getchar())) {
-//      console.log("index: " + index + " char: [" + c + "]");
-//    }
-//  }
+    if (lookahead.type == "EOF")
+    {
+      console.log("No more tokens");
+      return subExp;
+    }
 
-//  testGetchar("this is a long string & |");
+    if (lookahead.type == ")")
+    {
+      console.log("End parenthesized expression");
+      tokenizer.get();
+      return subExp;
+    }
 
-//  var shakespeare = new Tokenizer("to be or & not to | be");
-//  var auden       = new Tokenizer("perfection of & a kind was | what he was after");
-//
-//  dump(shakespeare);
-//  console.log("================");
-//  dump(auden);
+    tokenizer.get();
 
+    return new Exp(lookahead.type, subExp, makeMatcher(tokenizer));
+  }
+
+  str1 = new Exp("STR", "hello");
+  str2 = new Exp("STR", "bye");
+  and1 = new Exp("&", str1, str2);
 
   </script>
   </body>
